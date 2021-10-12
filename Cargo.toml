@@ -1,5 +1,5 @@
 [package]
-name = "cf_app_log_detector"
+name = "cf-app-log-detector"
 version = "0.1.0"
 authors = ["Olivier Lechevalier <olivier.lechevalier@gmail.com>"]
 edition = "2018"
@@ -11,9 +11,6 @@ keywords = ["cloud foundry", "cf", "log", "detector"]
 categories = ["detector"]
 
 [dependencies]
-access_log_parser = "^0"
 chrono = "^0.4"
-http = "^0.1"
 nom = "^4"
-defaultmap = "^0.4"
 clap = "^2"

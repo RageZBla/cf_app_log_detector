@@ -122,8 +122,9 @@ fn parse_message(input: &str) -> IResult<&str, Option<&str>> {
 	}
 }
 
-named!(parse_cf_app_log <&str, CfAppLogEntry>,
+named!(pub parse_cf_app_log <&str, CfAppLogEntry>,
 	do_parse!(
+		many0!(tag!(" ")) >>
 		timestamp: parse_date >>
 		tag!(" ") >>
 		component: parse_component >>
@@ -341,5 +342,38 @@ mod tests {
 			ChannelValid::Invalid(_) => panic!("should be valid")
 		}
 		assert_eq!(entry.message, None);
+	}
+
+	#[test]
+	fn test_parse_cf_app_log_with_space_prefix() {
+		let entry = parse_cf_app_log(
+			r#"     2021-09-28T17:00:09.36+0900 [APP/PROC/WEB/0] OUT 2021-09-28 08:00:09.361 DEBUG [,6152cb8077136e53942078a29eb7d0d8,942078a29eb7d0d8] 15 --- [   scheduling-1] i.s.l.r.s.ReminderEmailSchedulerImpl     : result ===> false"#
+		);
+        assert!(entry.is_ok(), "res: {:#?}", entry);
+
+		let entry = entry.unwrap().1;
+		assert_eq!(
+			entry.timestamp, 
+			FixedOffset::east(9 * 3600)
+				.ymd(2021, 9, 28)
+				.and_hms_milli(17, 0, 09, 360)
+		);
+		match entry.component {
+			ComponentInfoValid::Valid(comp) => {
+				assert_eq!(comp.name, Component::APPLICATION);
+				assert_eq!(comp.index, 0);
+			}
+			ComponentInfoValid::Invalid(_) => panic!("should be valid")
+		}
+		match entry.channel {
+			ChannelValid::Valid(chan) => {
+				assert_eq!(chan, Channel::STDOUT);
+			}
+			ChannelValid::Invalid(_) => panic!("should be valid")
+		}
+		assert_eq!(
+			entry.message, 
+			Some("2021-09-28 08:00:09.361 DEBUG [,6152cb8077136e53942078a29eb7d0d8,942078a29eb7d0d8] 15 --- [   scheduling-1] i.s.l.r.s.ReminderEmailSchedulerImpl     : result ===> false")
+		);
 	}
 }
