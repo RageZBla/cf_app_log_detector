@@ -41,7 +41,7 @@ fn main() {
     );
 
     let filename = matches.value_of("log").unwrap();
-    match detector.process_file(&filename) {
+    match detector.process_file(filename) {
         Ok(()) => (),
         Err(msg) => eprintln!("Failed parsing file: {}, message: {}", filename, msg),
     }
@@ -116,13 +116,13 @@ impl CfAppLogDetector {
                 "{} is a CF application log [{}% line matching]",
                 path, percentage_matching
             );
-            return 0;
+            0
         } else {
             eprintln!(
                 "{} is NOT CF application log [{}% line matching]",
                 path, percentage_matching
             );
-            return 1;
+            1
         }
     }
 

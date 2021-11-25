@@ -113,10 +113,10 @@ named!(parse_channel <&str, ChannelValid>,
 // Rust seems to be unable to see that function in used in parse_cf_app_log
 #[allow(dead_code)]
 fn parse_message(input: &str) -> IResult<&str, Option<&str>> {
-    if input.len() > 0 {
-        return IResult::Ok(("", Some(input)));
+    if !input.is_empty() {
+        IResult::Ok(("", Some(input)))
     } else {
-        return IResult::Ok(("", None));
+        IResult::Ok(("", None))
     }
 }
 
