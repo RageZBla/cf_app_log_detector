@@ -1,7 +1,7 @@
+use clap::{crate_version, value_t, App, Arg};
 use std::fs;
 use std::io;
 use std::io::prelude::*;
-use clap::{crate_version, value_t, App, Arg};
 
 use cf_app_log_detector::parse_cf_app_log;
 
@@ -37,7 +37,7 @@ fn main() {
 
     let mut detector = CfAppLogDetector::new(
         value_t!(matches, "percentage_matching", usize).unwrap(),
-        matches.is_present("one_line_match")
+        matches.is_present("one_line_match"),
     );
 
     let filename = matches.value_of("log").unwrap();
@@ -53,7 +53,7 @@ pub struct CfAppLogDetector {
     one_line_match: bool,
     total_log_lines: usize,
     log_lines_matching: usize,
-    trigger_percentage: usize, 
+    trigger_percentage: usize,
 }
 
 impl CfAppLogDetector {
@@ -66,10 +66,7 @@ impl CfAppLogDetector {
         }
     }
 
-    pub fn process_file(
-        &mut self,
-        path: &str
-    ) -> io::Result<()> {
+    pub fn process_file(&mut self, path: &str) -> io::Result<()> {
         let reader = io::BufReader::new(fs::File::open(path)?);
 
         reader
@@ -95,18 +92,15 @@ impl CfAppLogDetector {
         Ok(())
     }
 
-    pub fn show_results(
-        &mut self,
-        path: &str,
-        debug: bool
-    ) -> i32 {
+    pub fn show_results(&mut self, path: &str, debug: bool) -> i32 {
         if debug {
             println!("[DEBUG] total number of lines: {}", self.total_log_lines);
             println!("[DEBUG] log lines matching: {}", self.log_lines_matching);
         }
-        let percentage_matching : f64;  
+        let percentage_matching: f64;
         if self.total_log_lines > 0 {
-            percentage_matching = (self.log_lines_matching as f64 / self.total_log_lines as f64 * 100.0).floor();
+            percentage_matching =
+                (self.log_lines_matching as f64 / self.total_log_lines as f64 * 100.0).floor();
         } else {
             percentage_matching = 0.0;
         }
@@ -115,13 +109,19 @@ impl CfAppLogDetector {
             println!("[DEBUG] percentage matching: {}", percentage_matching)
         }
 
-
-        let matching = percentage_matching >= self.trigger_percentage as f64 || (self.log_lines_matching > 0 && self.one_line_match);
+        let matching = percentage_matching >= self.trigger_percentage as f64
+            || (self.log_lines_matching > 0 && self.one_line_match);
         if matching {
-            eprintln!("{} is a CF application log [{}% line matching]", path, percentage_matching);
+            eprintln!(
+                "{} is a CF application log [{}% line matching]",
+                path, percentage_matching
+            );
             return 0;
         } else {
-            eprintln!("{} is NOT CF application log [{}% line matching]", path, percentage_matching);
+            eprintln!(
+                "{} is NOT CF application log [{}% line matching]",
+                path, percentage_matching
+            );
             return 1;
         }
     }
