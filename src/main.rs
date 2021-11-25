@@ -126,10 +126,19 @@ impl CfAppLogDetector {
         }
     }
 
-    fn parse_line(line: &str) -> Result<bool, nom::Err<&str>> {
-        match parse_cf_app_log(line) {
-            Ok(_) => Ok(true),
-            Err(err) => Err(err),
+    fn parse_line(line: &str) -> Result<bool, Box<dyn std::error::Error>> {
+        // 136 |                     Err(err) => Err(Box::new(err)),
+        //                  ^^^^^^^^^^^^^^^^^^ returns a value referencing data owned by the current function
+        let stripped_line : String;
+        match strip_ansi_escapes::strip(line) {
+            Ok(stripped_vector) => {
+                stripped_line = String::from_utf8(stripped_vector.clone())?;
+                match parse_cf_app_log(&stripped_line) {
+                    Ok(_) => Ok(true),
+                    Err(_) => Ok(false) // TODO: can't do better now
+                }
+            }
+            Err(err) => Err(Box::new(err))
         }
     }
 }
