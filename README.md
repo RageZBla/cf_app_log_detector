@@ -34,4 +34,4 @@ exit codes:
 
 ## License
 
-This software is release under (MIT License](LICENSE).
+This software is release under [MIT License](LICENSE).
