@@ -7,19 +7,33 @@ on: [push] # for testing out
 name: build releases
 
 jobs:
-  build:
-    name: build for all platforms
+  linux_x86_64:
+    name: Linux x86_64
     runs-on: ubuntu-latest
-    env:
-      CARGO_TERM_COLOR: always
-      BINARY_NAME: cf_app_log_detector
     steps:
-    - uses: actions/checkout@v2
-    - name: Build-musl macOS x86
-      uses: Shogan/rust-musl-action@v1.0.2
-      with:
-        args: cargo build --target x86_64-apple-darwin --release
-    - name: Build-musl Linux x86
-      uses: Shogan/rust-musl-action@v1.0.2
-      with:
-        args: cargo build --target x86_64-unknown-linux-musl --release
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: x86_64-unknown-linux-gnu
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --target x86_64-unknown-linux-gnu
+  darwin:
+    name: Mac OS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: x86_64-apple-darwin
+          override: true
+          default: true
+      - uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: build
+          args: --target x86_64-apple-darwin
