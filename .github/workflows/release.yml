@@ -1,35 +1,33 @@
+name: Publish
+
 #on:
 #  push:
 #    tags:
-#       - '*'
-on: [push] # for testing out
-
-name: build releases
+#      - '*'
+on: [push]
 
 jobs:
-  linux_x86_64:
-    name: Linux x86_64
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: x86_64-unknown-linux-gnu
-          override: true
-      - name: Build
-        run: cargo build --all --release && strip target/release/cf-app-log-detector && mv target/release/cf-app-log-detector target/release/cf-app-log-detector-linux
-  darwin:
-    name: Mac OS
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: x86_64-apple-darwin
-          override: true
-          default: true
-      - name: Build for mac
-        run: cargo build --all --release && strip target/release/cf-app-log-detector && mv target/release/cf-app-log-detector target/release/cf-app-log-detector-mac
+  publish:
+    name: Publish for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: cf-app-log-detector
+            asset_name: cf-app-log-detector-linux-amd64
+          - os: macos-latest
+            artifact_name: cf-app-log-detector
+            asset_name: cf-app-log-detector-mac
 
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      run: cargo build --release --locked
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: target/release/${{ matrix.artifact_name }}
+        asset_name: ${{ matrix.asset_name }}
+        tag: ${{ github.ref }}
