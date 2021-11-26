@@ -23,7 +23,7 @@ jobs:
           args: --target x86_64-unknown-linux-gnu
   darwin:
     name: Mac OS
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
