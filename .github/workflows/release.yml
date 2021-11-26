@@ -1,25 +1,32 @@
-#on:
-#  push:
-#    tags:
-#       - '*'
-on: [push] # for testing out
+name: Publish
 
-name: build releases
+on:
+  push:
+    tags:
+      - '*'
 
 jobs:
-  build:
-    name: build for all platforms
-    runs-on: ubuntu-latest
-    env:
-      CARGO_TERM_COLOR: always
-      BINARY_NAME: cf_app_log_detector
+  publish:
+    name: Publish for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: cf-app-log-detector
+            asset_name: cf-app-log-detector-linux-amd64
+          - os: macos-latest
+            artifact_name: cf-app-log-detector
+            asset_name: cf-app-log-detector-mac
+
     steps:
     - uses: actions/checkout@v2
-    - name: Build-musl macOS x86
-      uses: Shogan/rust-musl-action@v1.0.2
+    - name: Build
+      run: cargo build --release --locked
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v2
       with:
-        args: cargo build --target x86_64-apple-darwin --release
-    - name: Build-musl Linux x86
-      uses: Shogan/rust-musl-action@v1.0.2
-      with:
-        args: cargo build --target x86_64-unknown-linux-musl --release
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: target/release/${{ matrix.artifact_name }}
+        asset_name: ${{ matrix.asset_name }}
+        tag: ${{ github.ref }}
