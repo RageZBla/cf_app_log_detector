@@ -69,7 +69,7 @@ impl CfAppLogDetector {
     pub fn process_file(&mut self, path: &str) -> io::Result<()> {
         let reader = io::BufReader::new(fs::File::open(path)?);
 
-        reader
+        let lines = reader
             .lines()
             .filter_map(|line| match line {
                 Ok(line) => Some(line),
@@ -77,18 +77,22 @@ impl CfAppLogDetector {
                     eprintln!("Read failed: {:#?}", msg);
                     None
                 }
-            })
-            .for_each(|line| match CfAppLogDetector::parse_line(&line) {
+            });
+        for line in lines {
+            match CfAppLogDetector::parse_line(&line) {
                 Ok(_log) => {
                     self.total_log_lines += 1;
                     self.log_lines_matching += 1;
-                    // TODO add something to break out on first match
+                    if self.one_line_match {
+                        break;
+                    }
                 }
                 Err(_err) => {
                     // eprintln!("parsing error: {}", _err);
                     self.total_log_lines += 1;
                 }
-            });
+            };
+        }
         Ok(())
     }
 
