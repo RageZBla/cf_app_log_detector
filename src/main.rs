@@ -75,7 +75,7 @@ impl CfAppLogDetector {
                     self.total_log_lines += 1;
                     self.log_lines_matching += 1;
                     if self.one_line_match {
-                        break
+                        break;
                     }
                 }
                 Err(_err) => {
