@@ -47,7 +47,7 @@ fn main() {
             eprintln!("File {} not found", filename);
             std::process::exit(1);
         }
-        Err(e) => { 
+        Err(e) => {
             eprintln!("Failed parsing file: {}, message: {}", filename, e);
             std::process::exit(2);
         }
