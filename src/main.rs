@@ -43,7 +43,14 @@ fn main() {
     let filename = matches.value_of("log").unwrap();
     match detector.process_file(filename) {
         Ok(()) => (),
-        Err(msg) => eprintln!("Failed parsing file: {}, message: {}", filename, msg),
+        Err(ref e) if e.kind() == std::io::ErrorKind::NotFound => {
+            eprintln!("File {} not found", filename);
+            std::process::exit(1);
+        }
+        Err(e) => { 
+            eprintln!("Failed parsing file: {}, message: {}", filename, e);
+            std::process::exit(2);
+        }
     }
 
     std::process::exit(detector.show_results(filename, matches.is_present("debug")));
