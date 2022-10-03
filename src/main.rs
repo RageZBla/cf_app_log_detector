@@ -99,13 +99,11 @@ impl CfAppLogDetector {
             println!("[DEBUG] total number of lines: {}", self.total_log_lines);
             println!("[DEBUG] log lines matching: {}", self.log_lines_matching);
         }
-        let percentage_matching: f64;
-        if self.total_log_lines > 0 {
-            percentage_matching =
-                (self.log_lines_matching as f64 / self.total_log_lines as f64 * 100.0).floor();
+        let percentage_matching = if self.total_log_lines > 0 {
+            (self.log_lines_matching as f64 / self.total_log_lines as f64 * 100.0).floor()
         } else {
-            percentage_matching = 0.0;
-        }
+            0.0
+        };
 
         if debug {
             println!("[DEBUG] percentage matching: {}", percentage_matching)
@@ -134,7 +132,7 @@ impl CfAppLogDetector {
         let stripped_line: String;
         match strip_ansi_escapes::strip(line) {
             Ok(stripped_vector) => {
-                stripped_line = String::from_utf8(stripped_vector.clone())?;
+                stripped_line = String::from_utf8(stripped_vector)?;
                 match parse_cf_app_log(&stripped_line) {
                     Ok(_) => Ok(true),
                     Err(_) => Ok(false), // TODO: can't do better now

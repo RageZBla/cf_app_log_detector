@@ -2,7 +2,7 @@ use chrono::prelude::*;
 use nom::*;
 
 // https://docs.cloudfoundry.org/devguide/deploy-apps/streaming-logs.html#format
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, PartialEq, PartialOrd, Eq)]
 pub enum Component {
     API,
     STAGING,
@@ -26,7 +26,7 @@ pub struct ComponentInfo {
     pub index: u32,
 }
 
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, PartialEq, PartialOrd, Eq)]
 pub enum Channel {
     STDOUT,
     STDERR,
