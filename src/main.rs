@@ -144,3 +144,47 @@ impl CfAppLogDetector {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use assert_cmd::Command;
+    use predicates::prelude::*;
+
+    #[test]
+    fn file_doesnt_exist() {
+        let mut cmd = Command::cargo_bin("cf-app-log-detector").unwrap();
+        cmd.arg("test/file/doesnt/exists");
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "File test/file/doesnt/exists not found",
+        ));
+    }
+
+    #[test]
+    fn matching_file() {
+        let mut cmd = Command::cargo_bin("cf-app-log-detector").unwrap();
+        cmd.arg("test/file/matching.txt");
+        cmd.assert().success().stderr(predicate::str::contains(
+            "test/file/matching.txt is a CF application log [100% line matching]",
+        ));
+    }
+
+    #[test]
+    fn debug() {
+        let mut cmd = Command::cargo_bin("cf-app-log-detector").unwrap();
+        cmd.arg("test/file/matching.txt").arg("--debug");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("[DEBUG]"));
+    }
+
+    #[test]
+    fn first_line_match() {
+        let mut cmd = Command::cargo_bin("cf-app-log-detector").unwrap();
+        cmd.arg("test/file/matching.txt")
+            .arg("--one-line-match")
+            .arg("--debug");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("total number of lines: 1"));
+    }
+}
